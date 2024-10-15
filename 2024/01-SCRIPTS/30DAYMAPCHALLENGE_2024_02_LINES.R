@@ -10,6 +10,67 @@ library(sf)
 font_add_google("Roboto Condensed", "Roboto Condensed")
 showtext_auto()
 
+
+# TEST --------------------------------------------------------------------
+
+bbx <- rbind(x = c(-3.34027, -3.04810), y = c(55.88769, 56.00093))
+colnames(bbx) <- c("min", "max")
+
+place <- "Scotland"
+
+rivers <- opq(place) |> 
+  add_osm_feature(key = "waterway",
+                  value = "river") |> 
+  osmdata_sf()
+
+# rivers <- opq(place) |> 
+#   add_osm_feature(key = "water",
+#                   value = "river") |> 
+#   osmdata_sf()
+
+p <- ggplot() +
+  geom_sf(data = rivers$osm_lines,
+          inherit.aes = FALSE,
+          color = "blue",
+          alpha = 0.8,
+          linewidth = 0.5)
+
+ggsave(filename = "2024/02-MAPS/02_LINES.png", plot = p, 
+       dpi = 320, width = 6, height = 6)
+
+
+motorway <- bbx |> 
+  opq() |> 
+  add_osm_feature(key = "highway",
+                  value = "motorway") |> 
+  osmdata_sf()
+
+buses <- bbx |> 
+  opq() |> 
+  add_osm_feature(key = "route",
+                  value = "bus") |> 
+  osmdata_sf()
+
+lothian_buses <- buses$osm_multilines |> 
+  filter(network == "Lothian Buses")
+
+unique(buses$osm_multilines$network)
+
+
+ggplot() +
+  geom_sf(data = lothian_buses$geometry,
+          inherit.aes = FALSE)
+
+p <- ggplot() +
+  geom_sf(data = buses$osm_multilines,
+          inherit.aes = FALSE,
+          color = "black",
+          alpha = 0.8,
+          linewidth = 0.5)
+
+p
+
+
 # CREATE MAP FUNCTION -----------------------------------------------------
 
 create_map <- function(coords, place,
