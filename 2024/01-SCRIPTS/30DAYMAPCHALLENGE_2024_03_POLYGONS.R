@@ -4,14 +4,29 @@ library(osmdata)
 library(tidyverse)
 library(showtext)
 library(sf)
+library(SpatialEpi)
 
 # IMPORT FONTS ------------------------------------------------------------
 
 font_add_google("Roboto Condensed", "Roboto Condensed")
 showtext_auto()
 
+# https://osdatahub.os.uk/downloads/open/BoundaryLine
+# https://www.paulamoraga.com/book-geospatial/sec-arealdataexamplespatial.html
+
 
 # TEST --------------------------------------------------------------------
+
+dt <- sf::st_read("2024/00-DATA/bdline_essh_gb/Data/GB/scotland_and_wales_region.shp")
+
+p <- dt |> 
+  filter(AREA_CODE == "SPE") |> 
+  ggplot() +
+  geom_sf(aes(fill = NAME))
+
+ggsave(filename = "2024/02-MAPS/03_POLYGONS.png", plot = p, 
+       dpi = 320, width = 6, height = 6)
+
 
 bbx <- rbind(x = c(-5.23187, -3.5), y = c(55.80272, 56.5))
 colnames(bbx) <- c("min", "max")

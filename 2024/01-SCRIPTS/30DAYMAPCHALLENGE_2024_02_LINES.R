@@ -2,7 +2,7 @@
 
 library(osmdata)
 library(tidyverse)
-library(showtext)
+# library(showtext)
 library(sf)
 
 # IMPORT FONTS ------------------------------------------------------------
@@ -10,18 +10,208 @@ library(sf)
 font_add_google("Roboto Condensed", "Roboto Condensed")
 showtext_auto()
 
+# SHETLAND ROADS ----------------------------------------------------------
+
+shetland_bd <- sf::st_read("2024/00-DATA/bdline_essh_gb/Data/GB/scotland_and_wales_const_region.shp") |> 
+  filter(NAME == "Shetland Islands P Const")
+
+# boundaries <- sf::st_read("2024/00-DATA/bdline_essh_gb/Data/GB/scotland_and_wales_const_region.shp")
+
+# scotland <- boundaries |> 
+#   filter(AREA_CODE == "SPC")
+
+# shetland <- boundaries |> 
+#   filter(NAME == "Shetland Islands P Const")
+
+hp_roads <- sf::st_read("2024/00-DATA/oproad_essh_gb/data/HP_RoadLink.shp")
+hu_roads <- sf::st_read("2024/00-DATA/oproad_essh_gb/data/HU_RoadLink.shp")
+ht_roads <- sf::st_read("2024/00-DATA/oproad_essh_gb/data/HT_RoadLink.dbf")
+
+p <- ggplot() +
+  geom_sf(data = shetland_bd, fill = "#003f5c", color = "#003f5c") +
+  geom_sf(data = hp_roads, color = "#374c80", linewidth = 0.5) +
+  geom_sf(data = hu_roads, color = "#374c80", linewidth = 0.5) +
+  geom_sf(data = ht_roads, color = "#374c80", linewidth = 0.5) +
+  theme_void() +
+  theme(panel.background = element_rect(fill = "#001017"))
+
+ggsave(filename = "2024/02-MAPS/02_LINES.png", plot = p, 
+       dpi = 320, width = 6, height = 6)
+
+
+# RIVERS ------------------------------------------------------------------
+
+shape.data <- sf::st_read("2024/00-DATA/oprvrs_essh_gb/data/WatercourseLink.shp")
+
+roads <- sf::st_read("2024/00-DATA/oproad_essh_gb/data/NT_RoadLink.shp")
+
+ggplot(data = roads) +
+  geom_sf(linewidth = 0.5)
+
+d1 <- sf::st_read("2024/00-DATA/bdline_essh_gb/Data/")
+
+d1 |> 
+  filter(AREA_CODE == "SPC") |> 
+  ggplot() +
+  geom_sf(aes(fill = FILE_NAME))
+
+ggplot(data = shape.data) +
+  geom_sf(linewidth = 0.5) +
+  coord_sf(ylim = c(55, 65))
+
 
 # TEST --------------------------------------------------------------------
 
-bbx <- rbind(x = c(-3.34027, -3.04810), y = c(55.88769, 56.00093))
+map <- map_data(region = "United Kingdom")
+
+bbx <- rbind(x = c(-2.55695, 0.03033), y = c(59.42892, 60.93901))
 colnames(bbx) <- c("min", "max")
 
-place <- "Scotland"
-
-rivers <- opq(place) |> 
-  add_osm_feature(key = "waterway",
-                  value = "river") |> 
+motorway <- bbx |> 
+  opq() |> 
+  add_osm_feature(key = "highway",
+                  value = "motorway") |> 
   osmdata_sf()
+
+motorway_link <- bbx |> 
+  opq() |> 
+  add_osm_feature(key = "highway",
+                  value = "motorway_link") |> 
+  osmdata_sf()
+
+primary <- bbx |> 
+  opq() |> 
+  add_osm_feature(key = "highway",
+                  value = "primary") |> 
+  osmdata_sf()
+
+primary_link <- bbx |> 
+  opq() |> 
+  add_osm_feature(key = "highway",
+                  value = "primary_link") |> 
+  osmdata_sf()
+
+secondary <- bbx |> 
+  opq() |> 
+  add_osm_feature(key = "highway",
+                  value = "secondary") |> 
+  osmdata_sf()
+
+secondary_link <- bbx |> 
+  opq() |> 
+  add_osm_feature(key = "highway",
+                  value = "secondary_link") |> 
+  osmdata_sf()
+
+tertiary <- bbx |> 
+  opq() |> 
+  add_osm_feature(key = "highway",
+                  value = "tertiary") |> 
+  osmdata_sf()
+
+tertiary_link <- bbx |> 
+  opq() |> 
+  add_osm_feature(key = "highway",
+                  value = "tertiary_link") |> 
+  osmdata_sf()
+
+residential <- bbx |> 
+  opq() |> 
+  add_osm_feature(key = "highway",
+                  value = "residential") |> 
+  osmdata_sf()
+
+living_street <- bbx |> 
+  opq() |> 
+  add_osm_feature(key = "highway",
+                  value = "living_street") |> 
+  osmdata_sf()
+
+unclassified <- bbx |> 
+  opq() |> 
+  add_osm_feature(key = "highway",
+                  value = "unclassified") |> 
+  osmdata_sf()
+
+service <- bbx |> 
+  opq() |> 
+  add_osm_feature(key = "highway",
+                  value = "service") |> 
+  osmdata_sf()
+
+footway <- bbx |> 
+  opq() |> 
+  add_osm_feature(key = "highway",
+                  value = "footway") |> 
+  osmdata_sf()
+
+ggplot() +
+  geom_sf(data = motorway$osm_lines,
+          inherit.aes = FALSE,
+          color = "red",
+          alpha = 0.8,
+          linewidth = 0.5) +
+  geom_sf(data = motorway_link$osm_lines,
+          inherit.aes = FALSE,
+          color = "red",
+          alpha = 0.8,
+          linewidth = 0.3) +
+  geom_sf(data = primary$osm_lines,
+          inherit.aes = FALSE,
+          color = "red",
+          alpha = 0.6,
+          linewidth = 0.5) +
+  geom_sf(data = primary_link$osm_lines,
+          inherit.aes = FALSE,
+          color = "red",
+          alpha = 0.6,
+          linewidth = 0.3) +
+  geom_sf(data = secondary$osm_lines,
+          inherit.aes = FALSE,
+          color = "red",
+          alpha = 0.6,
+          linewidth = 0.3) +
+  geom_sf(data = secondary_link$osm_lines,
+          inherit.aes = FALSE,
+          color = "red",
+          alpha = 0.6,
+          size = 0.3) +
+  geom_sf(data = tertiary$osm_lines,
+          inherit.aes = FALSE,
+          color = "red",
+          alpha = 0.5,
+          linewidth = 0.2) +
+  geom_sf(data = tertiary_link$osm_lines,
+          inherit.aes = FALSE,
+          color = "red",
+          alpha = 0.5,
+          linewidth = 0.2) +
+  geom_sf(data = residential$osm_lines,
+          inherit.aes = FALSE,
+          color = "red",
+          alpha = 0.4,
+          linewidth = 0.2) +
+  geom_sf(data = living_street$osm_lines,
+          inherit.aes = FALSE,
+          color = "red",
+          alpha = 0.4,
+          linewidth = 0.2) +
+  geom_sf(data = unclassified$osm_lines,
+          inherit.aes = FALSE,
+          color = "red",
+          alpha = 0.4,
+          linewidth = 0.2) +
+  geom_sf(data = service$osm_lines,
+          inherit.aes = FALSE,
+          color = "red",
+          alpha = 0.4,
+          linewidth = 0.2) +
+  geom_sf(data = footway$osm_lines,
+          inherit.aes = FALSE,
+          color = "red",
+          alpha = 0.4,
+          linewidth = 0.2)
+
 
 # rivers <- opq(place) |> 
 #   add_osm_feature(key = "water",
