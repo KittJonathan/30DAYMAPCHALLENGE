@@ -1,11 +1,11 @@
 # PACKAGES ----------------------------------------------------------------
 
-# library(osmdata)
+library(osmdata)
 library(tidyverse)
 library(showtext)
 library(sf)
-library(rnaturalearth)
-library(rnaturalearthdata)
+# library(rnaturalearth)
+# library(rnaturalearthdata)
 # library(SpatialEpi)
 
 # IMPORT FONTS ------------------------------------------------------------
@@ -13,8 +13,86 @@ library(rnaturalearthdata)
 font_add_google("Roboto Condensed", "Roboto Condensed")
 showtext_auto()
 
-bbx <- rbind(x = c(-3.38421, -3.04295), y = c(55.88519, 56.01360))
+bbx <- rbind(x = c(-3.38, -3.1), y = c(55.92, 56))
 colnames(bbx) <- c("min", "max")
+
+motorway <- bbx |> 
+  opq() |> 
+  add_osm_feature(key = "highway",
+                  value = "motorway") |> 
+  osmdata_sf()
+
+motorway_link <- bbx |> 
+  opq() |> 
+  add_osm_feature(key = "highway",
+                  value = "motorway_link") |> 
+  osmdata_sf()
+
+primary <- bbx |> 
+  opq() |> 
+  add_osm_feature(key = "highway",
+                  value = "primary") |> 
+  osmdata_sf()
+
+primary_link <- bbx |> 
+  opq() |> 
+  add_osm_feature(key = "highway",
+                  value = "primary_link") |> 
+  osmdata_sf()
+
+secondary <- bbx |> 
+  opq() |> 
+  add_osm_feature(key = "highway",
+                  value = "secondary") |> 
+  osmdata_sf()
+
+secondary_link <- bbx |> 
+  opq() |> 
+  add_osm_feature(key = "highway",
+                  value = "secondary_link") |> 
+  osmdata_sf()
+
+tertiary <- bbx |> 
+  opq() |> 
+  add_osm_feature(key = "highway",
+                  value = "tertiary") |> 
+  osmdata_sf()
+
+tertiary_link <- bbx |> 
+  opq() |> 
+  add_osm_feature(key = "highway",
+                  value = "tertiary_link") |> 
+  osmdata_sf()
+
+residential <- bbx |> 
+  opq() |> 
+  add_osm_feature(key = "highway",
+                  value = "residential") |> 
+  osmdata_sf()
+
+living_street <- bbx |> 
+  opq() |> 
+  add_osm_feature(key = "highway",
+                  value = "living_street") |> 
+  osmdata_sf()
+
+unclassified <- bbx |> 
+  opq() |> 
+  add_osm_feature(key = "highway",
+                  value = "unclassified") |> 
+  osmdata_sf()
+
+service <- bbx |> 
+  opq() |> 
+  add_osm_feature(key = "highway",
+                  value = "service") |> 
+  osmdata_sf()
+
+footway <- bbx |> 
+  opq() |> 
+  add_osm_feature(key = "highway",
+                  value = "footway") |> 
+  osmdata_sf()
 
 tram <- bbx |> 
   opq() |> 
@@ -22,11 +100,99 @@ tram <- bbx |>
                   value = "tram") |> 
   osmdata_sf()
 
-tram2 <- tram$osm_lines |> 
+tram_line <- tram$osm_lines |> 
   filter(wikipedia == "en:Edinburgh Trams")
 
-stops <- tram$osm_points |> 
+tram_stops <- tram$osm_points |> 
   filter(!is.na(name))
+
+p <- ggplot() +
+  geom_sf(data = motorway$osm_lines,
+          inherit.aes = FALSE,
+          color = "#374c80",
+          alpha = 0.3,
+          linewidth = 0.2) +
+  geom_sf(data = motorway_link$osm_lines,
+          inherit.aes = FALSE,
+          color = "#374c80",
+          alpha = 0.3,
+          linewidth = 0.2) +
+  geom_sf(data = primary$osm_lines,
+          inherit.aes = FALSE,
+          color = "#374c80",
+          alpha = 0.3,
+          linewidth = 0.2) +
+  geom_sf(data = primary_link$osm_lines,
+          inherit.aes = FALSE,
+          color = "#374c80",
+          alpha = 0.3,
+          linewidth = 0.2) +
+  geom_sf(data = secondary$osm_lines,
+          inherit.aes = FALSE,
+          color = "#374c80",
+          alpha = 0.3,
+          linewidth = 0.2) +
+  geom_sf(data = secondary_link$osm_lines,
+          inherit.aes = FALSE,
+          color = "#374c80",
+          alpha = 0.3,
+          linewidth = 0.2) +
+  geom_sf(data = tertiary$osm_lines,
+          inherit.aes = FALSE,
+          color = "#374c80",
+          alpha = 0.3,
+          linewidth = 0.2) +
+  geom_sf(data = tertiary_link$osm_lines,
+          inherit.aes = FALSE,
+          color = "#374c80",
+          alpha = 0.3,
+          linewidth = 0.2) +
+  geom_sf(data = residential$osm_lines,
+          inherit.aes = FALSE,
+          color = "#374c80",
+          alpha = 0.3,
+          linewidth = 0.2) +
+  geom_sf(data = living_street$osm_lines,
+          inherit.aes = FALSE,
+          color = "#374c80",
+          alpha = 0.3,
+          linewidth = 0.2) +
+  geom_sf(data = unclassified$osm_lines,
+          inherit.aes = FALSE,
+          color = "#374c80",
+          alpha = 0.3,
+          linewidth = 0.2) +
+  geom_sf(data = service$osm_lines,
+          inherit.aes = FALSE,
+          color = "#374c80",
+          alpha = 0.3,
+          linewidth = 0.2) +
+  geom_sf(data = footway$osm_lines,
+          inherit.aes = FALSE,
+          color = "#374c80",
+          alpha = 0.3,
+          linewidth = 0.2) +
+  geom_sf(data = tram_line$geometry,
+          inherit.aes = FALSE,
+          color = "#7a5195",
+          linewidth = 2.5) +
+  geom_sf(data = tram_stops$geometry,
+          inherit.aes = FALSE,
+          color = "#7a5195",
+          size = 6, shape = 21, fill = "#001017") +
+  theme_void() +
+  theme(panel.background = element_rect(fill = "#001017"))
+
+ggsave(filename = "2024/02-MAPS/05_A_JOURNEY.png", plot = p, 
+       dpi = 320, width = 12, height = 6)
+
+
++
+  geom_sf(data = tram_line$geometry,
+          inherit.aes = FALSE,
+          color = "darkblue",
+          alpha = 0.4,
+          linewidth = 0.8)
 
 tram$osm_points$name
 
