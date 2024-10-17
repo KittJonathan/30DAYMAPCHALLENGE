@@ -13,7 +13,7 @@ library(sf)
 font_add_google("Roboto Condensed", "Roboto Condensed")
 showtext_auto()
 
-bbx <- rbind(x = c(-3.38, -3.1), y = c(55.92, 56))
+bbx <- rbind(x = c(-3.38, -3.15), y = c(55.92, 56))
 colnames(bbx) <- c("min", "max")
 
 motorway <- bbx |> 
@@ -104,101 +104,92 @@ tram_line <- tram$osm_lines |>
   filter(wikipedia == "en:Edinburgh Trams")
 
 tram_stops <- tram$osm_points |> 
-  filter(!is.na(name))
+  filter(!is.na(name), name != "West Town") |> 
+  slice_sample(n = 1, by = name)
 
 p <- ggplot() +
   geom_sf(data = motorway$osm_lines,
           inherit.aes = FALSE,
           color = "#374c80",
-          alpha = 0.3,
+          alpha = 0.4,
           linewidth = 0.2) +
   geom_sf(data = motorway_link$osm_lines,
           inherit.aes = FALSE,
           color = "#374c80",
-          alpha = 0.3,
+          alpha = 0.4,
           linewidth = 0.2) +
   geom_sf(data = primary$osm_lines,
           inherit.aes = FALSE,
           color = "#374c80",
-          alpha = 0.3,
+          alpha = 0.4,
           linewidth = 0.2) +
   geom_sf(data = primary_link$osm_lines,
           inherit.aes = FALSE,
           color = "#374c80",
-          alpha = 0.3,
+          alpha = 0.4,
           linewidth = 0.2) +
   geom_sf(data = secondary$osm_lines,
           inherit.aes = FALSE,
           color = "#374c80",
-          alpha = 0.3,
+          alpha = 0.4,
           linewidth = 0.2) +
   geom_sf(data = secondary_link$osm_lines,
           inherit.aes = FALSE,
           color = "#374c80",
-          alpha = 0.3,
+          alpha = 0.4,
           linewidth = 0.2) +
   geom_sf(data = tertiary$osm_lines,
           inherit.aes = FALSE,
           color = "#374c80",
-          alpha = 0.3,
+          alpha = 0.4,
           linewidth = 0.2) +
   geom_sf(data = tertiary_link$osm_lines,
           inherit.aes = FALSE,
           color = "#374c80",
-          alpha = 0.3,
+          alpha = 0.4,
           linewidth = 0.2) +
   geom_sf(data = residential$osm_lines,
           inherit.aes = FALSE,
           color = "#374c80",
-          alpha = 0.3,
+          alpha = 0.4,
           linewidth = 0.2) +
   geom_sf(data = living_street$osm_lines,
           inherit.aes = FALSE,
           color = "#374c80",
-          alpha = 0.3,
+          alpha = 0.4,
           linewidth = 0.2) +
   geom_sf(data = unclassified$osm_lines,
           inherit.aes = FALSE,
           color = "#374c80",
-          alpha = 0.3,
+          alpha = 0.4,
           linewidth = 0.2) +
   geom_sf(data = service$osm_lines,
           inherit.aes = FALSE,
           color = "#374c80",
-          alpha = 0.3,
+          alpha = 0.4,
           linewidth = 0.2) +
   geom_sf(data = footway$osm_lines,
           inherit.aes = FALSE,
           color = "#374c80",
-          alpha = 0.3,
+          alpha = 0.4,
           linewidth = 0.2) +
   geom_sf(data = tram_line$geometry,
           inherit.aes = FALSE,
           color = "#7a5195",
-          linewidth = 2.5) +
+          linewidth = 1.5) +
   geom_sf(data = tram_stops$geometry,
           inherit.aes = FALSE,
           color = "#7a5195",
           size = 6, shape = 21, fill = "#001017") +
+  coord_sf(xlim = c(-3.38, -3.15), 
+           ylim = c(55.92, 56),
+           expand = FALSE) +
   theme_void() +
   theme(panel.background = element_rect(fill = "#001017"))
 
 ggsave(filename = "2024/02-MAPS/05_A_JOURNEY.png", plot = p, 
        dpi = 320, width = 12, height = 6)
 
-
-+
-  geom_sf(data = tram_line$geometry,
-          inherit.aes = FALSE,
-          color = "darkblue",
-          alpha = 0.4,
-          linewidth = 0.8)
-
-tram$osm_points$name
-
-ggplot() +
-  geom_sf(data = tram2$geometry) +
-  geom_sf(data = stops$geometry)
 
 # HEX MAP -----------------------------------------------------------------
 
