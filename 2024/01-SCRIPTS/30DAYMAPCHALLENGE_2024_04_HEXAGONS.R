@@ -1,132 +1,54 @@
-# PACKAGES ----------------------------------------------------------------
+# 30 DAY MAP CHALLENGE
+# 2024
+# 04 - HEXAGONS
 
-# library(osmdata)
-library(tidyverse)
-library(showtext)
-library(sf)
-library(rnaturalearth)
-library(rnaturalearthdata)
-# library(SpatialEpi)
+# 📦 LOAD PACKAGES --------------------------------------------------------
 
-# IMPORT FONTS ------------------------------------------------------------
+pacman::p_load(tidyverse, sf, showtext)
+
+# 🔠 IMPORT FONT ----------------------------------------------------------
 
 font_add_google("Roboto Condensed", "Roboto Condensed")
 showtext_auto()
 
-# https://osdatahub.os.uk/downloads/open/BoundaryLine
-# https://www.paulamoraga.com/book-geospatial/sec-arealdataexamplespatial.html
-# https://stackoverflow.com/questions/67694691/drawing-map-with-ggplot-and-draw-dots-in-map
-# https://nrennie.rbind.io/blog/creating-typewriter-maps-r/
-# https://rpubs.com/Hailstone/326118
+# ⬇️ IMPORT DATASET -------------------------------------------------------
 
+# OS Data Hub
+# https://osdatahub.os.uk/
 
-# HEX MAP -----------------------------------------------------------------
+landslides <- sf::st_read("2024/00-DATA/GeoSureHexGrids/GeoSureHexGrids/Data/GB_Hex_5km_GS_Landslides_v8.shp")
 
-sco_wales <- sf::st_read("2024/00-DATA/bdline_essh_gb/Data/GB/scotland_and_wales_region.shp")
+# 📊 CREATE MAP -----------------------------------------------------------
 
-world <- ne_countries(scale = "medium", returnclass = "sf")
+cols <- c("Low" = "#ffffbf",
+          "Moderate" = "#ffd480",
+          "Significant" = "#e69900")
 
-uk <- world |> 
-  filter(sovereignt == "United Kingdom")
+p <- ggplot() +
+  geom_sf(data = landslides,
+          aes(fill = Legend),
+          col = "#9ee1ff") +
+  scale_fill_manual(values = cols) +
+  labs(title = "Landslide risk",
+       caption = "Data source: https://osdatahub.os.uk") +
+  theme_void() +
+  theme(panel.background = element_rect(fill = "#9ee1ff", colour = "#9ee1ff"),
+        plot.background = element_rect(fill = "#9ee1ff", colour = "#9ee1ff"),
+        plot.title = element_text(family = "Roboto Condensed",
+                                  colour = "#003f5c", face = "bold",
+                                  hjust = 0.5, size = 60, margin = margin(t = 10, b = 5)),
+        plot.caption = element_text(family = "Roboto Condensed",
+                                    colour = "#003f5c", face = "italic",
+                                    hjust = 0.5, size = 25, margin = margin(b = 10)),
+        plot.title.position = "plot",
+        plot.caption.position = "plot",
+        legend.title = element_blank(),
+        legend.position = "right",
+        legend.text = element_text(family = "Roboto Condensed", colour = "#003f5c",
+                                   size = 25),
+        legend.key.size = unit(0.4, "cm"))
 
-sort(unique(uk$admin))
+# 💾 SAVE MAP -------------------------------------------------------------
 
-UK <- ne_countries(scale = "medium",
-                   country = "United Kingdom", 
-                   returnclass = "sf") |>
-  st_geometry() |> ## only geometry needed to clip the hexagonal grid
-  st_transform(27700) ## reproject to British National Grid
-
-hexgrid <- st_make_grid(UK,
-                        cellsize = 2e4, ## unit: metres; change as required
-                        what = 'polygons',
-                        square = FALSE ## !
-) |>
-  st_as_sf()
-
-hexgrid_UK <- hexgrid[c(unlist(st_contains(UK, hexgrid)), 
-                        unlist(st_overlaps(UK, hexgrid))) ,] 
-
-UK |> plot(col = "white")
-hexgrid_UK |> plot(add = TRUE)
-
-ggplot(data = hexgrid_UK) +
-  geom_sf()
-
-
-# TEST --------------------------------------------------------------------
-
-UK <- ne_countries(scale = "large",
-                   country = "United Kingdom",
-                   returnclass = "sf") |>
-  st_geometry() |> ## only geometry needed to clip the hexagonal grid
-  st_transform(27700) ## reproject to British National Grid
-
-
-hexgrid <- st_make_grid(UK,
-                        cellsize = 2e4, ## unit: metres; change as required
-                        what = 'polygons',
-                        square = FALSE ## !
-) |>
-  st_as_sf()
-
-hexgrid_UK <- hexgrid[c(unlist(st_contains(UK, hexgrid)), 
-                        unlist(st_overlaps(UK, hexgrid))) ,] 
-
-scotland_boundaries <- sf::st_read("2024/00-DATA/bdline_essh_gb/Data/Supplementary_Country/country_region.shp") |> 
-  filter(NAME == "Scotland")
-
-ggplot() +
-  geom_sf(data = scotland_boundaries)
-
-test <- scotland_boundaries |> 
-  st_geometry()
-
-hexgrid <- st_make_grid(test,
-                        cellsize = 100, ## unit: metres; change as required
-                        what = 'polygons',
-                        square = FALSE ## !
-) |>
-  st_as_sf()
-
-ggplot(data = hexgrid) +
-  geom_sf()
-
-world <- map_data("world")
-
-scotland <- world |> 
-  filter(region == "UK", subregion == "Scotland")
-
-test <- scotland |> 
-  sf::st_as_sf(coords = c("long", "lat")) |> 
-  group_by(subregion, group) |> 
-  summarise(do_union = FALSE) |> 
-  st_cast("POLYGON") |> 
-  ungroup()
-
-ggplot(test) +
-  geom_sf()
-  
-
-
-
-
-
-
-
-world <- ne_countries(scale = 110)
-
-small_scale_map <- ggplot() +
-  geom_sf(data = world) +
-  coord_sf(xlim = c(-20, 50), ylim = c(33, 80)) +
-  ggtitle("Europe")
-
-small_scale_map
-
-europe <- ne_countries(scale = 50, continent = "Europe") 
-medium_scale_map <- ggplot() +
-  geom_sf(data = europe) +
-  coord_sf(xlim = c(5, 30), ylim = c(55, 71)) +
-  ggtitle("Norden")
-medium_scale_map
-
+ggsave(filename = "2024/02-MAPS/01_FINISHED/04_HEXAGONS.png", plot = p, 
+       dpi = 320, width = 6, height = 6)

@@ -1,320 +1,74 @@
-# PACKAGES ----------------------------------------------------------------
+# 30 DAY MAP CHALLENGE
+# 2024
+# 05 - A JOURNEY
 
-library(osmdata)
-library(tidyverse)
-library(showtext)
-library(sf)
-# library(rnaturalearth)
-# library(rnaturalearthdata)
-# library(SpatialEpi)
+# 📦 LOAD PACKAGES --------------------------------------------------------
 
-# IMPORT FONTS ------------------------------------------------------------
+pacman::p_load(tidyverse, showtext, sf, osm)
+
+# 🔠 IMPORT FONT ----------------------------------------------------------
 
 font_add_google("Roboto Condensed", "Roboto Condensed")
 showtext_auto()
 
-bbx <- rbind(x = c(-3.38, -3.15), y = c(55.92, 56))
-colnames(bbx) <- c("min", "max")
+# ⬇️ IMPORT DATASET -------------------------------------------------------
 
-motorway <- bbx |> 
-  opq() |> 
-  add_osm_feature(key = "highway",
-                  value = "motorway") |> 
+map_bg <- map_data("world") |> 
+  filter(region == "UK",
+         subregion != "Northern Ireland")
+
+ferry <- opq("Scotland") |> 
+  add_osm_feature(key = "route",
+                  value = "ferry") |> 
   osmdata_sf()
 
-motorway_link <- bbx |> 
-  opq() |> 
-  add_osm_feature(key = "highway",
-                  value = "motorway_link") |> 
-  osmdata_sf()
+# 🧹 CLEAN DATASET --------------------------------------------------------
 
-primary <- bbx |> 
-  opq() |> 
-  add_osm_feature(key = "highway",
-                  value = "primary") |> 
-  osmdata_sf()
+aberdeen_lerwick <- ferry$osm_lines |> 
+  filter(name == "Aberdeen-Lerwick",
+         operator == "NorthLink Ferries")
 
-primary_link <- bbx |> 
-  opq() |> 
-  add_osm_feature(key = "highway",
-                  value = "primary_link") |> 
-  osmdata_sf()
-
-secondary <- bbx |> 
-  opq() |> 
-  add_osm_feature(key = "highway",
-                  value = "secondary") |> 
-  osmdata_sf()
-
-secondary_link <- bbx |> 
-  opq() |> 
-  add_osm_feature(key = "highway",
-                  value = "secondary_link") |> 
-  osmdata_sf()
-
-tertiary <- bbx |> 
-  opq() |> 
-  add_osm_feature(key = "highway",
-                  value = "tertiary") |> 
-  osmdata_sf()
-
-tertiary_link <- bbx |> 
-  opq() |> 
-  add_osm_feature(key = "highway",
-                  value = "tertiary_link") |> 
-  osmdata_sf()
-
-residential <- bbx |> 
-  opq() |> 
-  add_osm_feature(key = "highway",
-                  value = "residential") |> 
-  osmdata_sf()
-
-living_street <- bbx |> 
-  opq() |> 
-  add_osm_feature(key = "highway",
-                  value = "living_street") |> 
-  osmdata_sf()
-
-unclassified <- bbx |> 
-  opq() |> 
-  add_osm_feature(key = "highway",
-                  value = "unclassified") |> 
-  osmdata_sf()
-
-service <- bbx |> 
-  opq() |> 
-  add_osm_feature(key = "highway",
-                  value = "service") |> 
-  osmdata_sf()
-
-footway <- bbx |> 
-  opq() |> 
-  add_osm_feature(key = "highway",
-                  value = "footway") |> 
-  osmdata_sf()
-
-tram <- bbx |> 
-  opq() |> 
-  add_osm_feature(key = "railway",
-                  value = "tram") |> 
-  osmdata_sf()
-
-tram_line <- tram$osm_lines |> 
-  filter(wikipedia == "en:Edinburgh Trams")
-
-tram_stops <- tram$osm_points |> 
-  filter(!is.na(name), name != "West Town") |> 
-  slice_sample(n = 1, by = name)
+# 📊 CREATE MAP -----------------------------------------------------------
 
 p <- ggplot() +
-  geom_sf(data = motorway$osm_lines,
-          inherit.aes = FALSE,
-          color = "#374c80",
-          alpha = 0.4,
-          linewidth = 0.2) +
-  geom_sf(data = motorway_link$osm_lines,
-          inherit.aes = FALSE,
-          color = "#374c80",
-          alpha = 0.4,
-          linewidth = 0.2) +
-  geom_sf(data = primary$osm_lines,
-          inherit.aes = FALSE,
-          color = "#374c80",
-          alpha = 0.4,
-          linewidth = 0.2) +
-  geom_sf(data = primary_link$osm_lines,
-          inherit.aes = FALSE,
-          color = "#374c80",
-          alpha = 0.4,
-          linewidth = 0.2) +
-  geom_sf(data = secondary$osm_lines,
-          inherit.aes = FALSE,
-          color = "#374c80",
-          alpha = 0.4,
-          linewidth = 0.2) +
-  geom_sf(data = secondary_link$osm_lines,
-          inherit.aes = FALSE,
-          color = "#374c80",
-          alpha = 0.4,
-          linewidth = 0.2) +
-  geom_sf(data = tertiary$osm_lines,
-          inherit.aes = FALSE,
-          color = "#374c80",
-          alpha = 0.4,
-          linewidth = 0.2) +
-  geom_sf(data = tertiary_link$osm_lines,
-          inherit.aes = FALSE,
-          color = "#374c80",
-          alpha = 0.4,
-          linewidth = 0.2) +
-  geom_sf(data = residential$osm_lines,
-          inherit.aes = FALSE,
-          color = "#374c80",
-          alpha = 0.4,
-          linewidth = 0.2) +
-  geom_sf(data = living_street$osm_lines,
-          inherit.aes = FALSE,
-          color = "#374c80",
-          alpha = 0.4,
-          linewidth = 0.2) +
-  geom_sf(data = unclassified$osm_lines,
-          inherit.aes = FALSE,
-          color = "#374c80",
-          alpha = 0.4,
-          linewidth = 0.2) +
-  geom_sf(data = service$osm_lines,
-          inherit.aes = FALSE,
-          color = "#374c80",
-          alpha = 0.4,
-          linewidth = 0.2) +
-  geom_sf(data = footway$osm_lines,
-          inherit.aes = FALSE,
-          color = "#374c80",
-          alpha = 0.4,
-          linewidth = 0.2) +
-  geom_sf(data = tram_line$geometry,
-          inherit.aes = FALSE,
-          color = "#7a5195",
-          linewidth = 1.5) +
-  geom_sf(data = tram_stops$geometry,
-          inherit.aes = FALSE,
-          color = "#7a5195",
-          size = 6, shape = 21, fill = "#001017") +
-  coord_sf(xlim = c(-3.38, -3.15), 
-           ylim = c(55.92, 56),
-           expand = FALSE) +
+  geom_polygon(data = map_bg,
+               aes(x = long, y = lat, group = group),
+               fill = "#003f5c",
+               alpha = 0.5) +
+  geom_sf(data = aberdeen_lerwick$geometry,
+          col = "#003f5c", linewidth = 2) +
+  geom_point(aes(x = -2.1, y = 57.15),
+             shape = 21, col = "#003f5c", fill = "#9ee1ff",
+             size = 4, stroke = 2) +
+  geom_point(aes(x = -1.12, y = 60.1),
+             shape = 21, col = "#003f5c", fill = "#9ee1ff",
+             size = 4, stroke = 2) +
+  geom_text(aes(x = -1.95, y = 57.0, label = "Aberdeen"),
+            family = "Roboto Condensed", size = 16,
+            hjust = 0) +
+  geom_text(aes(x = -0.85, y = 60.2, label = "Lerwick"),
+            family = "Roboto Condensed", size = 16,
+            hjust = 0) +
+  geom_text(aes(x = -1.16, y = 58.5, label = "216 miles"),
+            family = "Roboto Condensed", size = 10,
+            hjust = 0) +
+  coord_sf(xlim = c(-8, 0),
+           ylim = c(56, 61)) +
+  labs(title = "The longest ferry crossing in Scotland") +
   theme_void() +
-  theme(panel.background = element_rect(fill = "#001017"))
+  theme(panel.background = element_rect(fill = "#9ee1ff", colour = "#9ee1ff"),
+        plot.background = element_rect(fill = "#9ee1ff", colour = "#9ee1ff"),
+        plot.title = element_text(family = "Roboto Condensed",
+                                  colour = "#003f5c", face = "bold",
+                                  hjust = 0.5, size = 60, margin = margin(t = 10, b = 10)),
+        plot.caption = element_text(family = "Roboto Condensed",
+                                    colour = "#003f5c", face = "italic",
+                                    hjust = 0.5, size = 25, margin = margin(b = 10)),
+        plot.title.position = "plot",
+        plot.caption.position = "plot")
 
-ggsave(filename = "2024/02-MAPS/05_A_JOURNEY.png", plot = p, 
-       dpi = 320, width = 12, height = 6)
+# 💾 SAVE MAP -------------------------------------------------------------
 
-
-# HEX MAP -----------------------------------------------------------------
-
-# world <- ne_countries(scale = "medium", returnclass = "sf")
-
-sort(unique(world$geounit))
-
-world <- map_data("world")
-
-test <- world |> 
-  filter(region == "UK", subregion == "Scotland") |> 
-  sf::st_as_sf(coords = c("long", "lat")) |> 
-  group_by(subregion, group) |> 
-  summarise(do_union = FALSE) |> 
-  st_cast("POLYGON") |> 
-  ungroup()
-
-ggplot() +
-  geom_sf(data = test)
-
-unique(world$region)
-
-
-
-uk <- world |> 
-  filter(sovereignt == "United Kingdom")
-
-sort(unique(uk$admin))
-
-UK <- ne_countries(scale = "medium",
-                   country = "United Kingdom", 
-                   returnclass = "sf") |>
-  st_geometry() |> ## only geometry needed to clip the hexagonal grid
-  st_transform(27700) ## reproject to British National Grid
-
-hexgrid <- st_make_grid(UK,
-                        cellsize = 2e4, ## unit: metres; change as required
-                        what = 'polygons',
-                        square = FALSE ## !
-) |>
-  st_as_sf()
-
-hexgrid_UK <- hexgrid[c(unlist(st_contains(UK, hexgrid)), 
-                        unlist(st_overlaps(UK, hexgrid))) ,] 
-
-UK |> plot(col = "white")
-hexgrid_UK |> plot(add = TRUE)
-
-ggplot(data = hexgrid_UK) +
-  geom_sf()
-
-
-# TEST --------------------------------------------------------------------
-
-UK <- ne_countries(scale = "large",
-                   country = "United Kingdom",
-                   returnclass = "sf") |>
-  st_geometry() |> ## only geometry needed to clip the hexagonal grid
-  st_transform(27700) ## reproject to British National Grid
-
-
-hexgrid <- st_make_grid(UK,
-                        cellsize = 2e4, ## unit: metres; change as required
-                        what = 'polygons',
-                        square = FALSE ## !
-) |>
-  st_as_sf()
-
-hexgrid_UK <- hexgrid[c(unlist(st_contains(UK, hexgrid)), 
-                        unlist(st_overlaps(UK, hexgrid))) ,] 
-
-scotland_boundaries <- sf::st_read("2024/00-DATA/bdline_essh_gb/Data/Supplementary_Country/country_region.shp") |> 
-  filter(NAME == "Scotland")
-
-ggplot() +
-  geom_sf(data = scotland_boundaries)
-
-test <- scotland_boundaries |> 
-  st_geometry()
-
-hexgrid <- st_make_grid(test,
-                        cellsize = 100, ## unit: metres; change as required
-                        what = 'polygons',
-                        square = FALSE ## !
-) |>
-  st_as_sf()
-
-ggplot(data = hexgrid) +
-  geom_sf()
-
-world <- map_data("world")
-
-scotland <- world |> 
-  filter(region == "UK", subregion == "Scotland")
-
-test <- scotland |> 
-  sf::st_as_sf(coords = c("long", "lat")) |> 
-  group_by(subregion, group) |> 
-  summarise(do_union = FALSE) |> 
-  st_cast("POLYGON") |> 
-  ungroup()
-
-ggplot(test) +
-  geom_sf()
-  
-
-
-
-
-
-
-
-world <- ne_countries(scale = 110)
-
-small_scale_map <- ggplot() +
-  geom_sf(data = world) +
-  coord_sf(xlim = c(-20, 50), ylim = c(33, 80)) +
-  ggtitle("Europe")
-
-small_scale_map
-
-europe <- ne_countries(scale = 50, continent = "Europe") 
-medium_scale_map <- ggplot() +
-  geom_sf(data = europe) +
-  coord_sf(xlim = c(5, 30), ylim = c(55, 71)) +
-  ggtitle("Norden")
-medium_scale_map
+ggsave(filename = "2024/02-MAPS/01_FINISHED/05_A_JOURNEY.png", plot = p, 
+       dpi = 320, width = 6, height = 6)
 
