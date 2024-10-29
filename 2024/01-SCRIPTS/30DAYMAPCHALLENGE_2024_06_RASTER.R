@@ -24,13 +24,14 @@ showtext_auto()
 #   add_osm_feature(key = "building") |> 
 #   osmdata_sf()
 
-buildings <- opq(bbox = "Edinburgh") |>
-  add_osm_feature(key = "building") |>
+tramway <- opq(bbox = "Edinburgh") |>
+  add_osm_feature(key = "route",
+                  value = "tram") |>
   osmdata_sf()
 
 ggplot() +
-  geom_sf(data = buildings$osm_polygons,
-          aes(fill = height))
+  geom_sf(data = tramway$osm_multilines,
+          aes(col = start_date))
 
 
 place <- "Edinburgh"
